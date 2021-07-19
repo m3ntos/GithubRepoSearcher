@@ -8,10 +8,10 @@ import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.paging.CombinedLoadStates
+import androidx.paging.LoadState
 import com.example.githubreposearcher.R
 import com.example.githubreposearcher.databinding.FragmentRepoSearchBinding
-import com.example.githubreposearcher.domain.Result
-import com.example.githubreposearcher.domain.model.GitHubRepo
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -32,29 +32,31 @@ class RepoSearchFragment : Fragment(R.layout.fragment_repo_search) {
         }
         searchResultsRv.adapter = RepoSearchAdapter().apply {
             setOnItemClickListener { openBrowserTab(it.url) }
+            addLoadStateListener { loadStates -> onLoadStatesChange(binding, loadStates) }
+            errorView.btnRetry.setOnClickListener { this.retry() }
+            viewModel.repositoriesLiveData().observe(viewLifecycleOwner) { pagingData ->
+                submitData(viewLifecycleOwner.lifecycle, pagingData)
+            }
         }
-        errorView.btnRetry.setOnClickListener { viewModel.onRetryClick() }
-
-        viewModel.repositoriesLiveData().observe(viewLifecycleOwner) { renderState(binding, it) }
     }
 
-    private fun renderState(binding: FragmentRepoSearchBinding, result: Result<List<GitHubRepo>>) = with(binding) {
+    private fun onLoadStatesChange(binding: FragmentRepoSearchBinding, loadStates: CombinedLoadStates) = with(binding) {
         val stateViews = listOf(loadingView.root, errorView.root, emptyView.root, searchResultsRv)
         stateViews.forEach { it.isVisible = false }
 
-        when (result) {
-            Result.Loading -> {
+        when (loadStates.refresh) {
+            LoadState.Loading -> {
                 loadingView.root.isVisible = true
             }
-            is Result.Error -> {
+            is LoadState.Error -> {
                 errorView.root.isVisible = true
-                errorView.tvDescription.text = result.exception.message.toString()
+                errorView.tvDescription.text = (loadStates.refresh as LoadState.Error).error.message
             }
-            is Result.Success -> {
-                if (result.data.isEmpty()) emptyView.root.isVisible = true
-                else searchResultsRv.isVisible = true
+            is LoadState.NotLoading -> {
+                val isEmptyList = loadStates.append.endOfPaginationReached && searchResultsRv.adapter?.itemCount == 0
 
-                (searchResultsRv.adapter as RepoSearchAdapter).setList(result.data)
+                if (isEmptyList) emptyView.root.isVisible = true
+                else searchResultsRv.isVisible = true
             }
         }
     }

@@ -9,6 +9,9 @@ import retrofit2.http.Query
 interface NetworkApi {
 
     @GET("repositories")
-    fun getRepositories(@Query("q") searchQuery: String): Single<RepositoriesResponse>
-
+    fun getRepositories(
+        @Query("q") searchQuery: String,
+        @Query("page") page: Int,
+        @Query("per_page") perPage: Int
+    ): Single<RepositoriesResponse>
 }
