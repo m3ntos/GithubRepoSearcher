@@ -1,6 +1,7 @@
 package com.example.githubreposearcher.feature.reposearch
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
@@ -49,15 +50,19 @@ class RepoSearchFragment : Fragment(R.layout.fragment_repo_search) {
     }
 
     private fun renderState(binding: FragmentRepoSearchBinding, result: Result<List<GitHubRepo>>) = with(binding) {
+        searchResultsGroup.isVisible = false
         when (result) {
             Result.Loading -> {
-                // TODO()
+                loadingView.root.isVisible = true
             }
             is Result.Error -> {
-                // TODO()
+                errorView.root.isVisible = true
+                errorView.tvDescription.text = result.exception.message.toString()
             }
             is Result.Success -> {
-                searchResultsRv.isVisible = true
+                if (result.data.isEmpty()) emptyView.root.isVisible = true
+                else searchResultsRv.isVisible = true
+
                 (searchResultsRv.adapter as RepoSearchAdapter).setList(result.data)
             }
         }

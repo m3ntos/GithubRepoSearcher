@@ -2,4 +2,9 @@
     <string name="app_name">Github Repo Searcher</string>
 
     <string name="searchHint">Find GitHub repositories</string>
+    <string name="errorLabel">An error has occurred</string>
+    <string name="retry">try again</string>
+    <string name="emptyLabel">No results found</string>
+    <string name="emptyDescription">Try something different</string>
+    <string name="loadingLabel">Loading data</string>
 </resources>

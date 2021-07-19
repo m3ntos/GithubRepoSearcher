@@ -15,7 +15,10 @@
         android:theme="@style/Theme.GithubRepoSearcher"
         >
 
-        <activity android:name=".feature.main.MainActivity">
+        <activity
+            android:name=".feature.main.MainActivity"
+            android:windowSoftInputMode="adjustResize"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

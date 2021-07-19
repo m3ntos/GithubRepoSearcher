@@ -13,8 +13,7 @@ class RepoSearchViewModel @Inject constructor(productsRepository: GitHubReposito
     private val searchQuery: BehaviorSubject<String> = BehaviorSubject.create()
 
     val repositoriesList = searchQuery
-        .switchMapSingle { query -> productsRepository.getGithubRepositories(query) }
-        .toResult()
+        .switchMap { query -> productsRepository.getGithubRepositories(query).toResult() }
 
     fun onSearchQueryChanged(query: String) {
         searchQuery.onNext(query)
